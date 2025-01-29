@@ -20,12 +20,18 @@ const app = express();
 
 // Configuración CORS detallada
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5000', 'http://localhost:5173'],
+  origin: [
+    'http://localhost:3000', // Desarrollo local
+    'http://localhost:5000', // Desarrollo local
+    'http://localhost:5173', // Desarrollo local
+    'https://fritz-dashboard.vercel.app', // Producción en Vercel
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
 };
+
 
 // Middleware
 app.use(cors(corsOptions));
