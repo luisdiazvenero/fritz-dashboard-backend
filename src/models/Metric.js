@@ -56,6 +56,18 @@ const socialMetricSchema = new mongoose.Schema({
     enum: ['YouTube', 'Instagram', 'TikTok', 'Facebook'],
     required: true
   },
+  account: {
+    type: String,
+    required: function() {
+      return this.category === 'Instagram';
+    },
+    validate: {
+      validator: function(value) {
+        return this.category !== 'Instagram' || (typeof value === 'string' && value.trim().length > 0);
+      },
+      message: "El campo 'account' es obligatorio para métricas de Instagram."
+    }
+  },
   metric: {
     type: String,
     enum: [
@@ -86,6 +98,9 @@ const socialMetricSchema = new mongoose.Schema({
     required: true
   }
 }, { timestamps: true });
+
+
+
 
 
 // Media Investment Schema (sin cambios por ahora)

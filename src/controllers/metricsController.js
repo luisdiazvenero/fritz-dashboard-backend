@@ -7,7 +7,6 @@ import { mediaMetricsMock } from '../mocks/mediaMetrics.js';
 export const bulkInsertMetrics = async (req, res) => {
   try {
     const metrics = req.body;
-
     const errors = [];
     const validMetrics = [];
 
@@ -31,8 +30,30 @@ export const bulkInsertMetrics = async (req, res) => {
         return;
       }
 
-      // Crear instancia del modelo para validación
-      const instance = new Model(metric);
+       // Validar que 'account' sea obligatorio solo en Instagram
+if (metric.category === 'Instagram' && !metric.account) {
+  errors.push({
+    index,
+    type: metric.type,
+    category: metric.category,
+    error: "El campo 'account' es obligatorio para métricas de Instagram.",
+    details: metric,
+  });
+  return;
+}
+
+// Crear instancia del modelo con o sin `account`
+const metricData = {
+  type: metric.type,
+  category: metric.category,
+  metric: metric.metric,
+  value: metric.value,
+  date: metric.date,
+  ...(metric.category === 'Instagram' && metric.account ? { account: metric.account } : {}) // Solo incluir `account` si está definido
+};
+
+
+      const instance = new Model(metricData);
 
       // Validar y guardar errores
       const validationError = instance.validateSync();
@@ -69,6 +90,7 @@ export const bulkInsertMetrics = async (req, res) => {
     });
   }
 };
+
 
 
 // Helper function para obtener el modelo correcto
@@ -129,7 +151,7 @@ export const getWebMetrics = async (req, res) => {
 // Obtener métricas sociales
 export const getSocialMetrics = async (req, res) => {
   try {
-    const { startDate, endDate, platform } = req.query;
+    const { startDate, endDate, category, account } = req.query;
     let query = {};
 
     if (startDate && endDate) {
@@ -139,8 +161,12 @@ export const getSocialMetrics = async (req, res) => {
       };
     }
 
-    if (platform) {
-      query.platform = platform;
+    if (category) {
+      query.category = category;
+    }
+
+    if (account) {
+      query.account = account;
     }
 
     // Consultar siempre la base de datos
@@ -162,6 +188,7 @@ export const getSocialMetrics = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener las métricas sociales' });
   }
 };
+
 
 
 // Obtener métricas de medios
